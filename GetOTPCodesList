@@ -1,0 +1,24 @@
+import sys
+
+## Generates a list of otp codes
+def GetOTPCodeList(length, filename):
+
+## Gets all the possible values for the range depending on the OTP code length
+    otp_values = range(int("1" + ("0" * length)))
+    for i in otp_values:
+## Some OTP codes will start with zeros so this adds the necessary number of leading zeros
+        if len(str(i)) != length:
+            NumZeros = length - len(str(i))
+            i = "0" * NumZeros + str(i)
+            
+            print(i)
+## writes OTP codes to a file
+            with open(filename,'a+') as fh:
+                fh.write(i,'\n')
+                
+
+if __name__ == '__main__':
+
+    length = sys.argv[1]
+    filename = sys.argv[2]
+    GetOTPCodeList(int(length),filename)
