@@ -2,8 +2,15 @@
 
 
     param(
+        [Parameter(Mandatory=$True,ParameterSetName="RequiredString")]
         [string]$string,
-        [switch]$secret)
+        [Parameter(Mandatory=$True,ParameterSetName="RequiredSecret")]
+        [switch]$secret,
+        [string]$path,
+        [string]$filetype,
+        [switch]$help,
+        [switch] $nr)
+        
     if ($secret){
         $regex = @'
     {
@@ -212,13 +219,43 @@
     "Emails": "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}"
     }
 '@ | ConvertFrom-Json
-    $regex_type = 'secrets'
     }
+
+if ($help) {
+    Write-Host "Credminer is a PowerShell utility used to find secrets stored on the filesystem. It contains many preloaded regex patterns to search, but a specific string or regex may be specified as well."
+    Write-Host ""
+    Write-Host "Commands"
+    Write-Host "========="
+    Write-Host "-secrets    This switch will use preloaded regex patterns to search for secrets"
+    Write-Host "-string     This switch will use the indicated string or regex pattern to search for secrets"
+    Write-Host "-path       This is the path where the script will run, default is the current directory"
+    Write-Host "-filetype   This is the filetype you'd like to filter by, default looks for all filetypes"
+    Write-Host "-nr         This turns the recursive search off"
+    Write-Host ""
+    return
+}
+
 if ($string){
     $regex = "{'Search Pattern':'$string'}" | ConvertFrom-Json
     }
-
-Get-ChildItem -Recurse -ErrorAction SilentlyContinue | ForEach-Object {
+if ($PSBoundParameters.ContainsKey('string') -eq 'True' -Or $PSBoundParameters.ContainsKey('secret') -eq 'True') {
+    if ($PSBoundParameters.ContainsKey('nr') -eq 'True') {
+        $command = Get-ChildItem $path $filetype -ErrorAction SilentlyContinue
+    } else {
+        $command  = Get-ChildItem $path $filetype -Recurse -ErrorAction SilentlyContinue
+    }
+    if ($PSBoundParameters.ContainsKey('filetype') -eq 'False') {
+        $filetype = '*.*'
+    }
+    if ($PSBoundParameters.ContainsKey('path') -eq 'False') {
+        $path = (pwd).Path
+    } 
+    } else {
+        Write-Host "Invalid arguments. Did you provide either -secret OR -string?"
+        return
+    }
+    
+$command | ForEach-Object {
    foreach ($obj in $regex.PSObject.Properties){
    $pattern_name = $obj.Name
    $pattern_value = $obj.Value
