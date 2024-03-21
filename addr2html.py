@@ -8,7 +8,7 @@ def addr2html(file, num_columns):
     td_spacing = ' ' * 6
     for item in file:
         item = item.strip()
-            if count == 0:
+        if count == 0:
             html_table += tr_spacing + '<tr>\n'
         html_table += td_spacing + '<td>' + item + '</td>\n'
         count += 1
