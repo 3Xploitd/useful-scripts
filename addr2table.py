@@ -24,7 +24,10 @@ def addr2html(file, num_columns):
 
 def addr2markdown(file, num_columns):
     file = open(file, 'r').readlines()
-    markdown_table = '| Target Addresses |\n'
+    
+    markdown_table = '| Target Addresses '
+    markdown_table += '|' * num_columns + '\n|'
+    markdown_table += '-|' * num_columns + '\n'
     count = 0
     col_spacing = ' '
     for item in file:
